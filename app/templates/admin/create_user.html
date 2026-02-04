@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Create User - Image Gallery{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 500px;
+        margin: 50px auto;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: white;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
+    
+    .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .checkbox-group input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+    
+    .checkbox-group label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+    
+    .form-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 10px;
+        font-weight: 600;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-secondary {
+        background-color: #95a5a6;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+    
+    .helper-text {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin-top: 5px;
+    }
+    
+    h2 {
+        color: #2c3e50;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Create New User</h2>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" id="username" name="username" class="form-control" required>
+            <div class="helper-text">Must be unique</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+            <div class="helper-text">Must be a valid email address</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+            <div class="helper-text">At least 6 characters</div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+            <div class="helper-text">Must match the password above</div>
+        </div>
+        
+        <div class="form-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="is_admin" name="is_admin">
+                <label for="is_admin">Grant admin privileges</label>
+            </div>
+            <div class="helper-text">Admin users can manage other users and images</div>
+        </div>
+        
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">Create User</button>
+            <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

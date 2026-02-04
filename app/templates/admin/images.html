@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Images - Image Gallery{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .thumbnail {
+        max-width: 100px;
+        max-height: 100px;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Manage Images</h1>
+    <span class="badge bg-info">Total: {{ images.total }}</span>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Thumbnail</th>
+                <th>Title</th>
+                <th>Uploader</th>
+                <th>Visibility</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for image in images.items %}
+                <tr>
+                    <td>{{ image.id }}</td>
+                    <td>
+                        <img src="{{ image.get_s3_signed_url() }}" alt="{{ image.title }}" class="thumbnail">
+                    </td>
+                    <td><strong>{{ image.title[:30] }}</strong></td>
+                    <td>{{ image.uploader.username }}</td>
+                    <td>
+                        {% if image.is_public %}
+                            <span class="badge bg-success">Public</span>
+                        {% else %}
+                            <span class="badge bg-warning">Private</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ image.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{{ url_for('gallery.view_image', image_id=image.id) }}" class="btn btn-primary">View</a>
+                            <form method="POST" action="{{ url_for('admin.toggle_public', image_id=image.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-info">
+                                    {% if image.is_public %}Make Private{% else %}Make Public{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('admin.delete_image', image_id=image.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if images.pages > 1 %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if images.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.manage_images', page=images.prev_num) }}">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for page_num in images.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num == images.page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.manage_images', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+
+            {% if images.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.manage_images', page=images.next_num) }}">Next</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}
