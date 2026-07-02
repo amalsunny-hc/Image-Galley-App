@@ -1,0 +1,64 @@
+# ============================================================================
+# Docker Compose for AWS Deployment
+# ============================================================================
+# This version removes the local MySQL container and connects to AWS RDS
+#
+# USAGE FOR AWS:
+# 1. Make sure .env has DEPLOYMENT_MODE=aws
+# 2. Configure RDS_ENDPOINT, RDS_PASSWORD, S3_BUCKET_NAME in .env
+# 3. On EC2 with IAM role: docker-compose -f docker-compose.aws.yml up -d
+# 4. Access app at: http://your-instance-ip:5000
+#
+# For local Docker development instead, use the regular docker-compose.yml:
+#    docker-compose up -d
+# ============================================================================
+
+version: '3.8'
+
+services:
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: image_gallery_app
+    env_file:
+      - .env  # Uses DEPLOYMENT_MODE=aws, RDS_*, S3_* from unified .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
+    networks:
+      - gallery_network
+    command: python3 run.py
+    # Important: App will auto-detect DEPLOYMENT_MODE=aws from .env
+    # and connect to AWS RDS using RDS_ENDPOINT, RDS_USER, RDS_PASSWORD, etc
+    # For S3: EC2 instance must have IAM role with S3 permissions
+
+  # Optional: Nginx reverse proxy (uncomment if using with domain)
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: image_gallery_nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - flask_app
+  #   networks:
+  #     - gallery_network
+
+  # Optional: Auto-update container images
+  # watchtower:
+  #   image: containrrr/watchtower
+  #   container_name: image_gallery_watchtower
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: --interval 300
+  #   networks:
+  #     - gallery_network
+
+networks:
+  gallery_network:
+    driver: bridge

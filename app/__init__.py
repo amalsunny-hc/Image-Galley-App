@@ -14,7 +14,32 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///image_gallery.db')
+    
+    # Determine deployment mode and configure database accordingly
+    deployment_mode = os.getenv('DEPLOYMENT_MODE', 'local').lower()
+    
+    # Database configuration - supports all three scenarios
+    if deployment_mode == 'aws' and os.getenv('RDS_ENDPOINT'):
+        # AWS RDS MySQL configuration
+        rds_endpoint = os.getenv('RDS_ENDPOINT')
+        rds_user = os.getenv('RDS_USER', 'admin')
+        rds_password = os.getenv('RDS_PASSWORD')
+        rds_database = os.getenv('RDS_DATABASE', 'image_gallery')
+        rds_port = os.getenv('RDS_PORT', '3306')
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{rds_user}:{rds_password}@{rds_endpoint}:{rds_port}/{rds_database}'
+        app.logger.info('🔵 Connected to AWS RDS MySQL')
+    elif deployment_mode == 'docker' and os.getenv('MYSQL_USER'):
+        # Docker MySQL configuration
+        mysql_user = os.getenv('MYSQL_USER', 'gallery_user')
+        mysql_password = os.getenv('MYSQL_PASSWORD')
+        mysql_database = os.getenv('MYSQL_DATABASE', 'image_gallery')
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{mysql_user}:{mysql_password}@mysql:3306/{mysql_database}'
+        app.logger.info('🐳 Connected to Docker MySQL')
+    else:
+        # Default to SQLite for local development
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///image_gallery.db'
+        app.logger.info('📁 Using SQLite local database')
+    
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_FILE_SIZE', 16777216))
     
