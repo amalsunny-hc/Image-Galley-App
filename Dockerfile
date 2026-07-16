@@ -23,5 +23,5 @@ RUN mkdir -p app/static/uploads
 # Expose port
 EXPOSE 5000
 
-# Run application
+# Run gunicorn application
 CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "run:app"]
