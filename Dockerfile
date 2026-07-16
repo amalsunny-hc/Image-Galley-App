@@ -24,4 +24,4 @@ RUN mkdir -p app/static/uploads
 EXPOSE 5000
 
 # Run application
-CMD ["python3", "run.py"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "run:app"]
